@@ -1,0 +1,11 @@
+hardstatus alwayslastline
+#"%{kw}%?%-Lw%?%{wk}%n*%f%t%?(%u)%?%?%{kw}%+Lw%?%{kw}%=%l"
+
+#caption always "%{wk}%?%-Lw%?%{bw}%n*%f %t%?(%u)%?%?%{wk}%+Lw%?%{wk} --- %M%d%%%C%a"
+caption always "%{wk}%?%-Lw%?%{bw}%n*%f %t%?(%u)%?%?%{wk}%+Lw%?%{wk}"
+#caption always "%{+b wb}[%n]  %h"
+
+windowlist title "Num  Name%=Flags"
+windowlist string "%3n  %h%=%f"
+
+defscrollback 10000
