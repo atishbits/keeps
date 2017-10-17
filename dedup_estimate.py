@@ -3,8 +3,7 @@ import os
 import hashlib
 import pdb
 
-#This program computes and stores block checksums of files in a given directory.
-#output: dedup %age in the dataset
+#This program computes dedup% for all files contained under input directory
 
 def main():
     path = ""
@@ -31,7 +30,7 @@ def main():
             try:
                 file = open(filename, 'r')
             except Exception as e:
-                print "Oops! Failed to open file", filename, "due to exception:", e, ". Continuing though...."
+                print "Exception:", e, ". Continuing though...."
                 continue
             num_files_processed += 1
             if num_files_processed%100000 == 0:
