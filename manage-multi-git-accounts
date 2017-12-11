@@ -4,17 +4,29 @@ Managing multiple git accounts on same machine:
 
 ~/.ssh/config file:
 
-    # git
-    Host github.com
-       HostName github.com
-       User git
-       IdentityFile ~/.ssh/id_rsa
+# githubPersonal
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa
 
-    # BBPersonal
-    Host bbPersonal
-       HostName bitbucket.org
-       User git
-       IdentityFile ~/.ssh/id_rsa_bb
+# githubWork
+Host git-work
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_work
+
+# BBPersonal
+Host bb-personal
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/id_rsa_bb
+
+# BBWork
+Host bb-work
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/id_rsa_bb_work
 
 git clone git@bbPersonal:xyz/abc.git
 
