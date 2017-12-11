@@ -1,0 +1,49 @@
+git add *
+git commit -m "some recent compt programming stuff"
+git push
+git config user.name
+git config --list
+setup a local git user name: git config user.name "AK local"
+global git setting: vi ~/.gitconfig
+https://alvinalexander.com/git/git-show-change-username-email-address
+
+git clone git@bb-gmr:xyz/abc.git <<<-- in accordance to my git and ssh configs
+git clone -b atish_dev git@bb-gmr:xyz/abc.git <<<-- in accordance to my git and ssh configs
+
+git grep "string"
+
+==========
+git diff --cached #to diff already added files with origin
+
+====merge code from another branch (say develop) into your branch (say atish_dev)
+https://www.youtube.com/watch?v=g8BRcB9NLp4
+git checkout atish_dev
+git fetch origin
+#must commit any changes to local branch before this
+git merge origin/develop
+git checkout atish_dev; git fetch origin; git merge origin/develop
+
+there exist some tools like git mergetool --tool=emerge (as e.g.)
+
+========== LOC
+git ls-files | xargs wc -l
+git log --author="atish.kathpal@gmail.com" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
+
+==== resolving merge conflicts manually
+There will be code marked in this form:
+
+>>>>>
+ [My changes that conflict with the other branch]
+=====
+ [Their changes that conflict with current state of my branch]
+<<<<<
+
+========= Create a new branch in an existing repo
+Clone the main repo: git clone https://bitbucket.org/username/repo-fork.git
+Create a new local branch: git checkout -b my-branch
+Now I can start editing the code. Or, I can merge the master code with code from another branch, say develop to get all the latest changes in dev branch into my-branch. 
+Set the upstream as atish_dev on origin server: git push --set-upstream origin atish_dev
+
+=== checkout a different branch from the one you are at
+git checkout -b branchname
+git --set-upstream-branch origin/branchname branchname (kinda like this)
