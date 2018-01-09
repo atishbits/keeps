@@ -48,7 +48,8 @@ class EC2:
 if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4)
     #query_filter = [{'Name': 'instance-state-name', 'Values': ['running']}, {}]
-    query_filter = [{'Name': 'key-name', 'Values': ['braas-cc']}, {}]
+    filter_str = sys.argv[2]
+    query_filter = [{'Name': 'key-name', 'Values': [filter_str]}, {}]
     ec2_inst = EC2(query_filter)
     ec2_ip = sys.argv[1]
     instance, snap_id = ec2_inst.take_snapshot(ec2_ip, "/dev/sdb")
