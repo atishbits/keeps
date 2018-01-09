@@ -86,7 +86,7 @@ class CompressImage(ProcessBase):
                 ImageFile.MAXBLOCK = img.size[0] * img.size[1]
                 
                 # The 'quality' option is ignored for PNG files
-                img.save(filename, quality=50, optimize=True)
+                img.save(filename, quality=20, optimize=True)
  
             # Check that we've actually made it smaller
             origsize = getsize(backupname)
