@@ -24,7 +24,7 @@ Host bb-personal
 
 # BBWork
 Host bb-work
-    HostName bitbucket.org
+    HostName work.org-whatever-bitbucket.org
     User git
     IdentityFile ~/.ssh/id_rsa_bb_work
 

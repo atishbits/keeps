@@ -47,3 +47,10 @@ Set the upstream as atish_dev on origin server: git push --set-upstream origin a
 === checkout a different branch from the one you are at
 git checkout -b branchname
 git --set-upstream-branch origin/branchname branchname (kinda like this)
+
+=== feed existing code and commits to a new repo
+My code is already tracked by Git
+If your code is already tracked by Git then set this repository as your "origin" to push to.
+cd existing-project
+git remote set-url origin ssh://git@ngage.netapp.com:7999/atg-bb/reservoir.git
+git push -u origin master

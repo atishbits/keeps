@@ -1,0 +1,89 @@
+#setting up the environment
+
+#modify /etc/hosts to include this entry:172.30.14.218 NN-218
+
+#check if hdfs is running?
+jps
+bin/hadoop dfsadmin -report
+
+#password less ssh on EC2 using key-pair
+eval `ssh-agent`
+ssh-add ~/atish-reservoir.pem
+sudo ln -s /usr/local/hadoop-2.9.0 /usr/local/hadoop
+
+#hadoop/etc/hadoop/core-site.xml
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://NN-218:9000</value>
+    </property>
+</configuration>
+
+#hdfs-site.xml
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
+
+#hadoop commands https://dzone.com/articles/getting-hadoop-and-running
+/usr/local/hadoop/sbin/stop-all.sh
+rm -rf ~/tmp-hadoop-dir/*
+/usr/local/hadoop/bin/hdfs namenode -format
+/usr/local/hadoop/sbin/start-dfs.sh
+/usr/local/hadoop/bin/hdfs dfs -ls -R
+/usr/local/hadoop/bin/hdfs dfs -rm -r <dir> #for recursive deletion of files
+/usr/local/hadoop/bin/hdfs dfs -mkdir -p input
+/usr/local/hadoop/bin/hdfs dfs -put /usr/local/hadoop/etc/hadoop input
+ 
+#hadoop snapshots and dist cp 
+#https://community.hortonworks.com/articles/71775/managing-hadoop-dr-with-distcp-and-snapshots.html
+#LOCAL DIST-CP
+/usr/local/hadoop/bin/hdfs dfsadmin -allowSnapshot input
+/usr/local/hadoop/bin/hdfs dfs -createSnapshot input  s1
+/usr/local/hadoop/bin/hadoop distcp input/.snapshot/s1 input-destination
+/usr/local/hadoop/bin/hdfs dfs -put ./LICENSE.txt input
+/usr/local/hadoop/bin/hdfs dfs -ls -R input
+/usr/local/hadoop/bin/hdfs dfs -createSnapshot input s2
+/usr/local/hadoop/bin/hdfs snapshotDiff input s1 s2
+/usr/local/hadoop/bin/hadoop distcp -diff s1 s2 -update input input-destination
+
+#List all the snapshots of a directory
+/usr/local/hadoop/bin/hdfs dfs -ls /user/ubuntu/input/.snapshot
+#create an empty file in hdfs
+/usr/local/hadoop/bin/hdfs dfs touchz <file-name>
+ 
+#REMOTE INTER-CLUSTER DIST-CP - 
+#make sure that hdfs of target cluster is running on public IP and we are able to telnet to 
+#the HDFS process from source cluster
+/usr/local/hadoop/bin/hadoop distcp input/.snapshot/s1 hdfs://172.30.14.237:9000/input
+#check if destination got the data 
+/usr/local/hadoop/bin/hdfs dfs -ls -R hdfs://172.30.14.237:9000/input-dst
+#now allow and create s1 snapshot at target
+/usr/local/hadoop/bin/hdfs dfsadmin -allowSnapshot hdfs://172.30.14.237:9000/input-dst
+#source and destination snapshot names must be the same
+/usr/local/hadoop/bin/hdfs dfs -createSnapshot hdfs://172.30.14.237:9000/input-dst s1
+#add a new file at source before initiating incremental transfer
+/usr/local/hadoop/bin/hdfs dfs -put ./LICENSE.txt input
+#create a new snapshot at source
+/usr/local/hadoop/bin/hdfs dfs -createSnapshot input s2
+
+#perform an incremental snapshot based update to backup target
+#When "-diff s1 s2 src tgt" is passed, apply forward snapshot diff (from s1
+#to s2) of source cluster to the target cluster to sync target cluster with
+#// the source cluster. Referred to as "Fdiff" in the code.
+/usr/local/hadoop/bin/hadoop distcp -diff s1 s2 -update input hdfs://172.30.14.237:9000/input-dst
+
+#RESTORE: hadoop distcp -rdiff <bad-snapshot-at-src::newsnap> <last-good-snap-at-backup::oldsnap> -update <src(backup target)> <destination(production cluster)>
+#When "-rdiff s2 s1 src tgt" is passed, apply reversed snapshot diff (from
+#s2 to s1) of target cluster to the target cluster, so to make target
+#cluster go back to s1. Referred to as "Rdiff" in the code.
+/usr/local/hadoop/bin/hadoop distcp -rdiff s4 s3 -update hdfs://172.30.14.237:9000/input-dst input
+
+
+#OBSERVATIONS
+1. DistCP verifies that all required snapshots are present on source and destination before performing data transfers. => This is likely the reason why snap based distcp does not work with NFS connector. If we create a .snapshot directory at NFS target with appropriate name, distcp is likely to succeed!
+>Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.SnapshotException): Cannot find the snapshot of directory /input-dst with name s2
+>   at org.apache.hadoop.hdfs.server.namenode.snapshot.DirectorySnapshottableFeature.getSnapshotByName(DirectorySnapshottableFeature.java:292)
+>   at org.apache.hadoop.hdfs.server.namenode.snapshot.DirectorySnapshottableFeature.computeDiff(DirectorySnapshottableFeature.java:264)
