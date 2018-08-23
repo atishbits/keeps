@@ -83,7 +83,7 @@ rm -rf ~/tmp-hadoop-dir/*
 
 
 #OBSERVATIONS
-1. DistCP verifies that all required snapshots are present on source and destination before performing data transfers. => This is likely the reason why snap based distcp does not work with NFS connector. If we create a .snapshot directory at NFS target with appropriate name, distcp is likely to succeed!
+1. DistCP verifies that all required snapshots are present on source and destination before performing data transfers. => This is likely the reason why snap based distcp does not work with NFS. If we create a .snapshot directory at NFS target with appropriate name, distcp is likely to succeed!
 >Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.protocol.SnapshotException): Cannot find the snapshot of directory /input-dst with name s2
 >   at org.apache.hadoop.hdfs.server.namenode.snapshot.DirectorySnapshottableFeature.getSnapshotByName(DirectorySnapshottableFeature.java:292)
 >   at org.apache.hadoop.hdfs.server.namenode.snapshot.DirectorySnapshottableFeature.computeDiff(DirectorySnapshottableFeature.java:264)
